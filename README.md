@@ -2,7 +2,7 @@
 
 A professional enterprise dashboard application that provides a comprehensive view of all automation processes within UiPath Orchestrator. Monitor and manage your UiPath automation processes with real-time status updates and execution controls.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/swati354/uipath-oauth-3)
 
 ## Features
 
@@ -123,7 +123,7 @@ src/
 
 ### Cloudflare Pages
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/swati354/uipath-oauth-3)
 
 This application is optimized for deployment on Cloudflare Pages:
 

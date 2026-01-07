@@ -55,15 +55,9 @@ export function ProcessDetailsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-8 md:py-10 lg:py-12">
             <div className="flex items-center justify-center min-h-[60vh]">
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <div className="absolute inset-0 h-8 w-8 rounded-full border-2 border-primary/20"></div>
-                </div>
-                <div className="text-center space-y-2">
-                  <h3 className="text-lg font-medium text-foreground">Loading process details</h3>
-                  <p className="text-sm text-muted-foreground">Please wait while we fetch the information...</p>
-                </div>
+              <div className="flex items-center gap-3">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span className="text-muted-foreground">Loading process details...</span>
               </div>
             </div>
           </div>
@@ -76,15 +70,13 @@ export function ProcessDetailsPage() {
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-8 md:py-10 lg:py-12">
-            <div className="flex items-center justify-center min-h-[60vh]">
-              <Alert variant="destructive" className="max-w-md border-red-200 bg-red-50">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error Loading Process</AlertTitle>
-                <AlertDescription className="mt-2">
-                  {(error as Error).message}
-                </AlertDescription>
-              </Alert>
-            </div>
+            <Alert variant="destructive" className="max-w-md mx-auto">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error Loading Process</AlertTitle>
+              <AlertDescription>
+                {(error as Error).message}
+              </AlertDescription>
+            </Alert>
           </div>
         </div>
       </div>
@@ -95,17 +87,12 @@ export function ProcessDetailsPage() {
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-8 md:py-10 lg:py-12">
-            <div className="text-center space-y-6 max-w-md mx-auto">
-              <div className="rounded-full bg-muted p-6 w-20 h-20 mx-auto">
-                <AlertCircle className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <div className="space-y-2">
-                <h1 className="text-2xl font-bold text-foreground">Process Not Found</h1>
-                <p className="text-muted-foreground">
-                  The requested process could not be found or may have been removed.
-                </p>
-              </div>
-              <Button onClick={handleBack} variant="outline" className="hover:bg-secondary">
+            <div className="text-center space-y-4">
+              <h1 className="text-2xl font-bold text-foreground">Process Not Found</h1>
+              <p className="text-muted-foreground">
+                The requested process could not be found.
+              </p>
+              <Button onClick={handleBack} variant="outline">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Dashboard
               </Button>
@@ -120,52 +107,43 @@ export function ProcessDetailsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-8 md:py-10 lg:py-12">
           {/* Header */}
-          <div className="mb-8 space-y-6">
+          <div className="mb-8 space-y-4">
             <div className="flex items-center gap-4">
-              <Button 
-                onClick={handleBack} 
-                variant="outline" 
-                size="sm"
-                className="hover:bg-secondary transition-colors duration-200"
-              >
+              <Button onClick={handleBack} variant="outline" size="sm">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Activity className="h-6 w-6 text-primary" />
-                </div>
+              <div className="flex items-center gap-2">
+                <Activity className="h-6 w-6 text-primary" />
                 <h1 className="text-2xl font-bold text-foreground">Process Details</h1>
               </div>
             </div>
             {/* Process Overview Card */}
-            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <CardHeader className="pb-4">
+            <Card>
+              <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="space-y-3 flex-1">
-                    <div>
-                      <CardTitle className="text-xl text-foreground">{selectedProcess.name}</CardTitle>
-                      <CardDescription className="text-sm font-mono text-muted-foreground mt-1">
-                        {selectedProcess.key}
-                      </CardDescription>
-                    </div>
+                  <div className="space-y-2">
+                    <CardTitle className="text-xl">{selectedProcess.name}</CardTitle>
+                    <CardDescription className="text-sm font-mono text-muted-foreground">
+                      {selectedProcess.key}
+                    </CardDescription>
                     {selectedProcess.description && (
-                      <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+                      <p className="text-sm text-muted-foreground">
                         {selectedProcess.description}
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <Badge variant="outline" className="font-mono bg-secondary/50">
-                      v{selectedProcess.processVersion || 'N/A'}
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="font-mono">
+                      v{selectedProcess.version || 'N/A'}
                     </Badge>
-                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-green-200">
+                    <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
                       Available
                     </Badge>
                     <Button
                       onClick={() => setShowStartDialog(true)}
                       disabled={isStartingProcess}
-                      className="bg-primary hover:bg-primary/90 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
+                      className="bg-primary hover:bg-primary/90"
                     >
                       <Play className="mr-2 h-4 w-4" />
                       Start Process
@@ -177,12 +155,12 @@ export function ProcessDetailsPage() {
           </div>
           {/* Tabs for different sections */}
           <Tabs defaultValue="configuration" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 bg-muted/50">
-              <TabsTrigger value="configuration" className="flex items-center gap-2 data-[state=active]:bg-background">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="configuration" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
                 Configuration
               </TabsTrigger>
-              <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-background">
+              <TabsTrigger value="history" className="flex items-center gap-2">
                 <History className="h-4 w-4" />
                 Execution History
               </TabsTrigger>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { Activity, AlertCircle, Loader2, Settings, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import type { ProcessGetResponse } from 'uipath-sdk';
 export function HomePage() {
+  const navigate = useNavigate();
   // SDK initialization state
   const [sdkInitialized, setSdkInitialized] = useState(false);
   const [sdkError, setSdkError] = useState<string | null>(null);
@@ -21,11 +23,11 @@ export function HomePage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [folderFilter, setFolderFilter] = useState('all');
   // UiPath hooks - only enabled after SDK initialization
-  const { 
-    data: processes = [], 
-    isLoading: processesLoading, 
+  const {
+    data: processes = [],
+    isLoading: processesLoading,
     error: processesError,
-    refetch: refetchProcesses 
+    refetch: refetchProcesses
   } = useUiPathProcesses(undefined, sdkInitialized);
   const { mutateAsync: startProcess, isPending: isStartingProcess } = useStartProcess();
   // Initialize UiPath SDK on component mount
@@ -54,7 +56,7 @@ export function HomePage() {
   const filteredProcesses = React.useMemo(() => {
     return processes.filter((process: ProcessGetResponse) => {
       // Search filter
-      const matchesSearch = !searchTerm || 
+      const matchesSearch = !searchTerm ||
         process.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         process.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         process.key?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -67,15 +69,15 @@ export function HomePage() {
   }, [processes, searchTerm, statusFilter, folderFilter]);
   // Handle process start
   const handleStartProcess = useCallback(async (
-    processKey: string, 
-    folderId: number, 
+    processKey: string,
+    folderId: number,
     inputArguments?: Record<string, any>
   ) => {
     try {
       console.log('🚀 Starting process:', { processKey, folderId, inputArguments });
-      const result = await startProcess({ 
-        processKey, 
-        folderId 
+      const result = await startProcess({
+        processKey,
+        folderId
       });
       console.log('✅ Process started successfully:', result);
       toast.success(`Process "${processKey}" started successfully`);
@@ -88,6 +90,10 @@ export function HomePage() {
       throw error;
     }
   }, [startProcess, refetchProcesses]);
+  // Handle process details navigation
+  const handleViewDetails = useCallback((process: ProcessGetResponse) => {
+    navigate(`/process/${process.id}`);
+  }, [navigate]);
   // Handle refresh
   const handleRefresh = useCallback(() => {
     refetchProcesses();
@@ -255,6 +261,7 @@ export function HomePage() {
             <ProcessTable
               processes={filteredProcesses}
               onStartProcess={handleStartProcess}
+              onViewDetails={handleViewDetails}
               isStarting={isStartingProcess}
             />
           )}

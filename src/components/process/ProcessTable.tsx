@@ -12,13 +12,14 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 import { StartProcessDialog } from './StartProcessDialog';
-import { Play, ArrowUpDown, Calendar, FileText, Key } from 'lucide-react';
+import { Play, ArrowUpDown, Calendar, FileText, Key, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { ProcessGetResponse } from 'uipath-sdk';
 interface ProcessTableProps {
   processes: ProcessGetResponse[];
   onStartProcess: (processKey: string, folderId: number, inputArguments?: Record<string, any>) => Promise<void>;
+  onViewDetails?: (process: ProcessGetResponse) => void;
   isStarting?: boolean;
   className?: string;
 }
@@ -27,6 +28,7 @@ type SortDirection = 'asc' | 'desc';
 export function ProcessTable({
   processes,
   onStartProcess,
+  onViewDetails,
   isStarting = false,
   className
 }: ProcessTableProps) {
@@ -48,8 +50,8 @@ export function ProcessTable({
           bValue = b.key?.toLowerCase() || '';
           break;
         case 'version':
-          aValue = a.processVersion || '';
-          bValue = b.processVersion || '';
+          aValue = a.version || '';
+          bValue = b.version || '';
           break;
         case 'lastModified':
           aValue = new Date(a.lastModifiedTime || 0);
@@ -74,6 +76,11 @@ export function ProcessTable({
   const handleStartClick = (process: ProcessGetResponse) => {
     setSelectedProcess(process);
     setShowStartDialog(true);
+  };
+  const handleRowClick = (process: ProcessGetResponse) => {
+    if (onViewDetails) {
+      onViewDetails(process);
+    }
   };
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -138,13 +145,14 @@ export function ProcessTable({
                 {sortedProcesses.map((process) => (
                   <TableRow
                     key={process.id}
-                    className="border-b border-border hover:bg-muted/50 transition-colors"
+                    className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => handleRowClick(process)}
                   >
                     <TableCell className="px-4 py-3">
                       <div className="flex flex-col">
                         <span className="font-medium text-foreground">{process.name}</span>
-                        {process.title && process.title !== process.name && (
-                          <span className="text-xs text-muted-foreground">{process.title}</span>
+                        {process.displayName && process.displayName !== process.name && (
+                          <span className="text-xs text-muted-foreground">{process.displayName}</span>
                         )}
                       </div>
                     </TableCell>
@@ -161,7 +169,7 @@ export function ProcessTable({
                     </TableCell>
                     <TableCell className="px-4 py-3">
                       <Badge variant="outline" className="font-mono text-xs">
-                        {process.processVersion || 'N/A'}
+                        {process.version || 'N/A'}
                       </Badge>
                     </TableCell>
                     <TableCell className="px-4 py-3">
@@ -174,15 +182,33 @@ export function ProcessTable({
                       </div>
                     </TableCell>
                     <TableCell className="px-4 py-3 text-right">
-                      <Button
-                        size="sm"
-                        onClick={() => handleStartClick(process)}
-                        disabled={isStarting}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                      >
-                        <Play className="h-3 w-3 mr-1" />
-                        Start
-                      </Button>
+                      <div className="flex items-center gap-2 justify-end">
+                        {onViewDetails && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onViewDetails(process);
+                            }}
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            View
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartClick(process);
+                          }}
+                          disabled={isStarting}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Start
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

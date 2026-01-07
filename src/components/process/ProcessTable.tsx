@@ -23,7 +23,7 @@ interface ProcessTableProps {
   isStarting?: boolean;
   className?: string;
 }
-type SortField = 'name' | 'key' | 'version' | 'lastModified';
+type SortField = 'name' | 'key' | 'processVersion' | 'lastModified';
 type SortDirection = 'asc' | 'desc';
 export function ProcessTable({
   processes,
@@ -49,9 +49,9 @@ export function ProcessTable({
           aValue = a.key?.toLowerCase() || '';
           bValue = b.key?.toLowerCase() || '';
           break;
-        case 'version':
-          aValue = a.version || '';
-          bValue = b.version || '';
+        case 'processVersion':
+          aValue = a.processVersion || '';
+          bValue = b.processVersion || '';
           break;
         case 'lastModified':
           aValue = new Date(a.lastModifiedTime || 0);
@@ -95,21 +95,26 @@ export function ProcessTable({
       variant="ghost"
       size="sm"
       onClick={() => handleSort(field)}
-      className="h-auto p-0 font-medium hover:bg-transparent"
+      className="h-auto p-0 font-medium hover:bg-transparent hover:text-primary transition-colors duration-200"
     >
       <span className="flex items-center gap-1">
         {children}
-        <ArrowUpDown className="h-3 w-3" />
+        <ArrowUpDown className={cn(
+          'h-3 w-3 transition-all duration-200',
+          sortField === field ? 'text-primary scale-110' : 'text-muted-foreground'
+        )} />
       </span>
     </Button>
   );
   if (processes.length === 0) {
     return (
-      <Card className={className}>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">No processes found</h3>
-          <p className="text-muted-foreground text-center max-w-md">
+      <Card className={cn('border-dashed border-2 hover:border-primary/50 transition-colors duration-300', className)}>
+        <CardContent className="flex flex-col items-center justify-center py-16">
+          <div className="rounded-full bg-muted p-4 mb-4">
+            <FileText className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No processes found</h3>
+          <p className="text-muted-foreground text-center max-w-md leading-relaxed">
             No processes match your current filters. Try adjusting your search criteria or check if processes are published in UiPath Orchestrator.
           </p>
         </CardContent>
@@ -118,71 +123,75 @@ export function ProcessTable({
   }
   return (
     <>
-      <Card className={className}>
+      <Card className={cn('overflow-hidden border-0 shadow-sm', className)}>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-border">
-                  <TableHead className="px-4 py-3">
+                <TableRow className="border-b border-border bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
+                  <TableHead className="px-6 py-4 font-semibold">
                     <SortButton field="name">Name</SortButton>
                   </TableHead>
-                  <TableHead className="px-4 py-3">
+                  <TableHead className="px-6 py-4 font-semibold">
                     <SortButton field="key">Key</SortButton>
                   </TableHead>
-                  <TableHead className="px-4 py-3">Description</TableHead>
-                  <TableHead className="px-4 py-3">
-                    <SortButton field="version">Version</SortButton>
+                  <TableHead className="px-6 py-4 font-semibold">Description</TableHead>
+                  <TableHead className="px-6 py-4 font-semibold">
+                    <SortButton field="processVersion">Version</SortButton>
                   </TableHead>
-                  <TableHead className="px-4 py-3">Status</TableHead>
-                  <TableHead className="px-4 py-3">
+                  <TableHead className="px-6 py-4 font-semibold">Status</TableHead>
+                  <TableHead className="px-6 py-4 font-semibold">
                     <SortButton field="lastModified">Last Modified</SortButton>
                   </TableHead>
-                  <TableHead className="px-4 py-3 text-right">Actions</TableHead>
+                  <TableHead className="px-6 py-4 text-right font-semibold">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedProcesses.map((process) => (
                   <TableRow
                     key={process.id}
-                    className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                    className="border-b border-border hover:bg-muted/30 transition-all duration-200 cursor-pointer group"
                     onClick={() => handleRowClick(process)}
                   >
-                    <TableCell className="px-4 py-3">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-foreground">{process.name}</span>
-                        {process.displayName && process.displayName !== process.name && (
-                          <span className="text-xs text-muted-foreground">{process.displayName}</span>
+                    <TableCell className="px-6 py-4">
+                      <div className="flex flex-col space-y-1">
+                        <span className="font-medium text-foreground group-hover:text-primary transition-colors duration-200">
+                          {process.name}
+                        </span>
+                        {process.title && process.title !== process.name && (
+                          <span className="text-xs text-muted-foreground">{process.title}</span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <div className="flex items-center gap-1 text-sm font-mono">
+                    <TableCell className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-sm font-mono">
                         <Key className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-muted-foreground">{process.key}</span>
+                        <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                          {process.key}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <span className="text-sm text-muted-foreground line-clamp-2">
+                    <TableCell className="px-6 py-4">
+                      <span className="text-sm text-muted-foreground line-clamp-2 max-w-xs">
                         {process.description || 'No description'}
                       </span>
                     </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <Badge variant="outline" className="font-mono text-xs">
-                        {process.version || 'N/A'}
+                    <TableCell className="px-6 py-4">
+                      <Badge variant="outline" className="font-mono text-xs bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+                        {process.processVersion || 'N/A'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-4 py-3">
+                    <TableCell className="px-6 py-4">
                       <ProcessStatusBadge status="Available" />
                     </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <TableCell className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
                         <span>{formatDate(process.lastModifiedTime)}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-right">
-                      <div className="flex items-center gap-2 justify-end">
+                    <TableCell className="px-6 py-4 text-right">
+                      <div className="flex items-center gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         {onViewDetails && (
                           <Button
                             size="sm"
@@ -191,6 +200,7 @@ export function ProcessTable({
                               e.stopPropagation();
                               onViewDetails(process);
                             }}
+                            className="hover:bg-secondary hover:border-primary/50 transition-all duration-200"
                           >
                             <Eye className="h-3 w-3 mr-1" />
                             View
@@ -203,7 +213,7 @@ export function ProcessTable({
                             handleStartClick(process);
                           }}
                           disabled={isStarting}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
                         >
                           <Play className="h-3 w-3 mr-1" />
                           Start

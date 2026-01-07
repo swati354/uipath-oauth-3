@@ -1,105 +1,178 @@
-# UiPath Dashboard Template
+# UiPath Orchestrator Process Monitor
 
-A comprehensive **frontend-only** React dashboard template pre-configured with the UiPath TypeScript SDK for building automation management applications.
+A professional enterprise dashboard application that provides a comprehensive view of all automation processes within UiPath Orchestrator. Monitor and manage your UiPath automation processes with real-time status updates and execution controls.
 
-## ⚠️ IMPORTANT: Real Data Only
-**This template uses REAL data from your UiPath environment. NEVER create mock, dummy, or placeholder data. All React Query hooks fetch live data from the configured UiPath SDK.**
-
-## ⚠️ IMPORTANT: Pre-configured Authentication
-**UiPath SDK credentials are hardcoded in `src/lib/uipath.ts`. DO NOT modify authentication or use environment variables. Just use the existing `uipath` client directly.**
+[cloudflarebutton]
 
 ## Features
 
-✅ **Pre-configured UiPath SDK** - Authentication and client setup ready to use
-✅ **React Query Hooks** - Efficient data fetching for all UiPath services
-✅ **UiPath-Branded Components** - Professional UI components for processes, queues, tasks
-✅ **Real-time Updates** - Automatic polling and refetching
-✅ **TypeScript** - Full type safety throughout
-✅ **Responsive Design** - Beautiful UI that works on all devices
-✅ **Pure Frontend** - No backend needed, SDK runs directly in browser
+- **Process Management**: View all processes in a clean, information-dense table format with real-time status indicators
+- **Advanced Filtering**: Filter processes by status (Available, Running, Failed), search by name/description, and select specific folders
+- **Real-time Monitoring**: Automatic refresh capabilities with color-coded status indicators (green for success, red for error, yellow for warning)
+- **Process Control**: Start processes directly from the interface with proper confirmation and feedback
+- **Professional UI**: Enterprise-grade dashboard with responsive design and intuitive navigation
+- **UiPath Integration**: Direct integration with UiPath Orchestrator using the official TypeScript SDK
 
-## Quick Start
+## Technology Stack
 
+- **Frontend**: React 18 with TypeScript
+- **UI Framework**: shadcn/ui components with Tailwind CSS
+- **State Management**: Zustand for client state
+- **Data Fetching**: TanStack React Query with UiPath SDK
+- **Authentication**: OAuth 2.0 with UiPath Orchestrator
+- **Build Tool**: Vite
+- **Deployment**: Cloudflare Pages
+- **Package Manager**: Bun
+
+## Prerequisites
+
+- [Bun](https://bun.sh/) runtime
+- UiPath Orchestrator instance with API access
+- OAuth External App configured in UiPath Orchestrator
+
+## Installation
+
+1. Clone the repository:
 ```bash
-npm install
-npm run dev
+git clone <repository-url>
+cd uipath-process-monitor
 ```
 
-## Available UiPath Services
+2. Install dependencies:
+```bash
+bun install
+```
 
-- **Processes** - View and start automation processes
-- **Queues** - Monitor queue items and status
-- **Tasks** - Manage Action Center tasks
-- **Assets** - Access orchestrator assets
-- **Maestro** - Control agentic process instances
+3. Configure environment variables by creating a `.env` file:
+```env
+VITE_UIPATH_BASE_URL=https://your-orchestrator-url.com
+VITE_UIPATH_ORG_NAME=your-organization-name
+VITE_UIPATH_TENANT_NAME=your-tenant-name
+VITE_UIPATH_CLIENT_ID=your-oauth-client-id
+VITE_UIPATH_REDIRECT_URI=http://localhost:3000
+VITE_UIPATH_SCOPE=OR.Execution
+```
 
-## Pre-built Components
+## UiPath OAuth Setup
 
-- `ProcessCard` - Display and manage processes
-- `QueueMonitor` - Real-time queue monitoring
-- `TaskCard` - Action Center task management
-- `JobStatusBadge` - Color-coded status indicators
+1. In UiPath Orchestrator, navigate to **Admin** > **External Applications**
+2. Create a new External Application with:
+   - **Application Type**: Confidential Application
+   - **Redirect URIs**: Your application URL (e.g., `http://localhost:3000` for development)
+   - **Scopes**: `OR.Execution` (minimum required)
+3. Copy the **Client ID** and use it in your `.env` file
+
+## Development
+
+Start the development server:
+```bash
+bun run dev
+```
+
+The application will be available at `http://localhost:3000`.
+
+### Available Scripts
+
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run preview` - Preview production build locally
+- `bun run lint` - Run ESLint
+
+## Usage
+
+### Process Dashboard
+
+The main dashboard displays all available processes from your UiPath Orchestrator:
+
+1. **View Processes**: All processes are displayed in a table with name, description, status, and last run information
+2. **Filter Processes**: Use the status filter buttons (Available, Running, Failed) to filter the view
+3. **Search**: Use the search input to find specific processes by name or description
+4. **Folder Selection**: Select specific folders to filter processes by organizational structure
+5. **Start Processes**: Click the "Start" button to execute a process with confirmation dialog
+
+### Real-time Updates
+
+The dashboard automatically refreshes every 30 seconds to provide real-time status updates. Status indicators use standard colors:
+- **Green**: Available/Success states
+- **Red**: Failed/Error states  
+- **Yellow**: Running/Warning states
+- **Blue**: Information states
 
 ## Project Structure
 
 ```
 src/
-├── lib/
-│   └── uipath.ts              # UiPath SDK client
-├── hooks/
-│   ├── useUiPathProcesses.ts  # Process hooks
-│   ├── useUiPathQueues.ts     # Queue hooks
-│   ├── useUiPathTasks.ts      # Task hooks
-│   ├── useUiPathAssets.ts     # Asset hooks
-│   └── useUiPathMaestro.ts    # Maestro hooks
-├── components/
-│   └── uipath/                # UiPath components
-│       ├── ProcessCard.tsx
-│       ├── QueueMonitor.tsx
-│       ├── TaskCard.tsx
-│       └── JobStatusBadge.tsx
-└── pages/
-    └── DashboardPage.tsx      # Example dashboard
+├── components/          # React components
+│   ├── ui/             # shadcn/ui components
+│   ├── uipath/         # UiPath-specific components
+│   └── layout/         # Layout components
+├── hooks/              # Custom React hooks for UiPath SDK
+├── lib/                # Utility libraries and UiPath SDK setup
+├── pages/              # Application pages
+└── main.tsx           # Application entry point
 ```
 
-## Usage Example
+## Key Components
 
-```typescript
-import { useUiPathProcesses, useStartProcess } from '@/hooks/useUiPathProcesses';
-import { ProcessCard } from '@/components/uipath/ProcessCard';
+- **ProcessCard**: Display and manage individual processes
+- **JobStatusBadge**: Color-coded status indicators
+- **QueueMonitor**: Monitor queue statistics
+- **TaskCard**: Manage Action Center tasks
 
-export function MyPage() {
-  // ✅ Hook returns REAL data from UiPath - no mock data needed
-  const { data: processes, isLoading } = useUiPathProcesses();
-  const { mutate: startProcess } = useStartProcess();
+## Deployment
 
-  return (
-    <div className="grid gap-4">
-      {/* ✅ processes contains REAL data from your UiPath Orchestrator */}
-      {processes?.map(process => (
-        <ProcessCard
-          key={process.id}
-          process={process}
-          onStart={(key) => startProcess({ processKey: key })}
-        />
-      ))}
-    </div>
-  );
-}
+### Cloudflare Pages
+
+[cloudflarebutton]
+
+This application is optimized for deployment on Cloudflare Pages:
+
+1. Build the application:
+```bash
+bun run build
 ```
 
-**❌ DO NOT create mock data:**
-```typescript
-// ❌ NO - Don't do this
-const mockProcesses = [{ id: 1, name: 'Fake' }];
-```
+2. Deploy to Cloudflare Pages:
+   - Connect your repository to Cloudflare Pages
+   - Set build command: `bun run build`
+   - Set build output directory: `dist`
+   - Configure environment variables in Cloudflare Pages dashboard
 
-## Documentation
+3. Update your UiPath External Application redirect URI to match your production URL
 
-- See `prompts/usage.md` for detailed usage instructions
-- UiPath SDK: https://github.com/UiPath/uipath-typescript
-- React Query: https://tanstack.com/query
+### Environment Variables for Production
+
+Ensure these environment variables are configured in your Cloudflare Pages settings:
+
+- `VITE_UIPATH_BASE_URL`
+- `VITE_UIPATH_ORG_NAME`
+- `VITE_UIPATH_TENANT_NAME`
+- `VITE_UIPATH_CLIENT_ID`
+- `VITE_UIPATH_REDIRECT_URI`
+- `VITE_UIPATH_SCOPE`
+
+## Security Considerations
+
+- OAuth credentials are handled securely through environment variables
+- All API calls use the official UiPath SDK with proper authentication
+- No sensitive data is stored in the client application
+- HTTPS is required for production deployments
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and commit: `git commit -m 'Add feature'`
+4. Push to the branch: `git push origin feature-name`
+5. Submit a pull request
 
 ## License
 
-MIT
+This project is licensed under the MIT License.
+
+## Support
+
+For issues related to:
+- **UiPath SDK**: Check the [official UiPath documentation](https://docs.uipath.com/)
+- **Application bugs**: Create an issue in this repository
+- **Deployment**: Refer to [Cloudflare Pages documentation](https://developers.cloudflare.com/pages/)

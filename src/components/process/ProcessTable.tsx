@@ -12,23 +12,21 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ProcessStatusBadge } from './ProcessStatusBadge';
 import { StartProcessDialog } from './StartProcessDialog';
-import { Play, ArrowUpDown, Calendar, FileText, Key, Eye } from 'lucide-react';
+import { Play, ArrowUpDown, Calendar, FileText, Key } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type { ProcessGetResponse } from 'uipath-sdk';
 interface ProcessTableProps {
   processes: ProcessGetResponse[];
   onStartProcess: (processKey: string, folderId: number, inputArguments?: Record<string, any>) => Promise<void>;
-  onViewDetails?: (process: ProcessGetResponse) => void;
   isStarting?: boolean;
   className?: string;
 }
-type SortField = 'name' | 'key' | 'processVersion' | 'lastModified';
+type SortField = 'name' | 'key' | 'version' | 'lastModified';
 type SortDirection = 'asc' | 'desc';
 export function ProcessTable({
   processes,
   onStartProcess,
-  onViewDetails,
   isStarting = false,
   className
 }: ProcessTableProps) {
@@ -49,7 +47,7 @@ export function ProcessTable({
           aValue = a.key?.toLowerCase() || '';
           bValue = b.key?.toLowerCase() || '';
           break;
-        case 'processVersion':
+        case 'version':
           aValue = a.processVersion || '';
           bValue = b.processVersion || '';
           break;
@@ -77,11 +75,6 @@ export function ProcessTable({
     setSelectedProcess(process);
     setShowStartDialog(true);
   };
-  const handleRowClick = (process: ProcessGetResponse) => {
-    if (onViewDetails) {
-      onViewDetails(process);
-    }
-  };
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
     try {
@@ -95,26 +88,21 @@ export function ProcessTable({
       variant="ghost"
       size="sm"
       onClick={() => handleSort(field)}
-      className="h-auto p-0 font-medium hover:bg-transparent hover:text-primary transition-colors duration-200"
+      className="h-auto p-0 font-medium hover:bg-transparent"
     >
       <span className="flex items-center gap-1">
         {children}
-        <ArrowUpDown className={cn(
-          'h-3 w-3 transition-all duration-200',
-          sortField === field ? 'text-primary scale-110' : 'text-muted-foreground'
-        )} />
+        <ArrowUpDown className="h-3 w-3" />
       </span>
     </Button>
   );
   if (processes.length === 0) {
     return (
-      <Card className={cn('border-dashed border-2 hover:border-primary/50 transition-colors duration-300', className)}>
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <div className="rounded-full bg-muted p-4 mb-4">
-            <FileText className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No processes found</h3>
-          <p className="text-muted-foreground text-center max-w-md leading-relaxed">
+      <Card className={className}>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">No processes found</h3>
+          <p className="text-muted-foreground text-center max-w-md">
             No processes match your current filters. Try adjusting your search criteria or check if processes are published in UiPath Orchestrator.
           </p>
         </CardContent>
@@ -123,102 +111,78 @@ export function ProcessTable({
   }
   return (
     <>
-      <Card className={cn('overflow-hidden border-0 shadow-sm', className)}>
+      <Card className={className}>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-border bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
-                  <TableHead className="px-6 py-4 font-semibold">
+                <TableRow className="border-b border-border">
+                  <TableHead className="px-4 py-3">
                     <SortButton field="name">Name</SortButton>
                   </TableHead>
-                  <TableHead className="px-6 py-4 font-semibold">
+                  <TableHead className="px-4 py-3">
                     <SortButton field="key">Key</SortButton>
                   </TableHead>
-                  <TableHead className="px-6 py-4 font-semibold">Description</TableHead>
-                  <TableHead className="px-6 py-4 font-semibold">
-                    <SortButton field="processVersion">Version</SortButton>
+                  <TableHead className="px-4 py-3">Description</TableHead>
+                  <TableHead className="px-4 py-3">
+                    <SortButton field="version">Version</SortButton>
                   </TableHead>
-                  <TableHead className="px-6 py-4 font-semibold">Status</TableHead>
-                  <TableHead className="px-6 py-4 font-semibold">
+                  <TableHead className="px-4 py-3">Status</TableHead>
+                  <TableHead className="px-4 py-3">
                     <SortButton field="lastModified">Last Modified</SortButton>
                   </TableHead>
-                  <TableHead className="px-6 py-4 text-right font-semibold">Actions</TableHead>
+                  <TableHead className="px-4 py-3 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {sortedProcesses.map((process) => (
                   <TableRow
                     key={process.id}
-                    className="border-b border-border hover:bg-muted/30 transition-all duration-200 cursor-pointer group"
-                    onClick={() => handleRowClick(process)}
+                    className="border-b border-border hover:bg-muted/50 transition-colors"
                   >
-                    <TableCell className="px-6 py-4">
-                      <div className="flex flex-col space-y-1">
-                        <span className="font-medium text-foreground group-hover:text-primary transition-colors duration-200">
-                          {process.name}
-                        </span>
+                    <TableCell className="px-4 py-3">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-foreground">{process.name}</span>
                         {process.title && process.title !== process.name && (
                           <span className="text-xs text-muted-foreground">{process.title}</span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm font-mono">
+                    <TableCell className="px-4 py-3">
+                      <div className="flex items-center gap-1 text-sm font-mono">
                         <Key className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                          {process.key}
-                        </span>
+                        <span className="text-muted-foreground">{process.key}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-6 py-4">
-                      <span className="text-sm text-muted-foreground line-clamp-2 max-w-xs">
+                    <TableCell className="px-4 py-3">
+                      <span className="text-sm text-muted-foreground line-clamp-2">
                         {process.description || 'No description'}
                       </span>
                     </TableCell>
-                    <TableCell className="px-6 py-4">
-                      <Badge variant="outline" className="font-mono text-xs bg-secondary/50 hover:bg-secondary transition-colors duration-200">
+                    <TableCell className="px-4 py-3">
+                      <Badge variant="outline" className="font-mono text-xs">
                         {process.processVersion || 'N/A'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="px-6 py-4">
+                    <TableCell className="px-4 py-3">
                       <ProcessStatusBadge status="Available" />
                     </TableCell>
-                    <TableCell className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <TableCell className="px-4 py-3">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
                         <span>{formatDate(process.lastModifiedTime)}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="px-6 py-4 text-right">
-                      <div className="flex items-center gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        {onViewDetails && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onViewDetails(process);
-                            }}
-                            className="hover:bg-secondary hover:border-primary/50 transition-all duration-200"
-                          >
-                            <Eye className="h-3 w-3 mr-1" />
-                            View
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStartClick(process);
-                          }}
-                          disabled={isStarting}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
-                        >
-                          <Play className="h-3 w-3 mr-1" />
-                          Start
-                        </Button>
-                      </div>
+                    <TableCell className="px-4 py-3 text-right">
+                      <Button
+                        size="sm"
+                        onClick={() => handleStartClick(process)}
+                        disabled={isStarting}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                      >
+                        <Play className="h-3 w-3 mr-1" />
+                        Start
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
